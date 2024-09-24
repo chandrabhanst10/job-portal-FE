@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an instance of Axios
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5500', // Your API base URL
+  baseURL: 'https://job-portal-be-zdwn.onrender.com', // Your API base URL
   timeout: 10000, // Optional: Set a timeout for requests
   withCredentials: true, // Ensure cookies are sent with requests
 });
