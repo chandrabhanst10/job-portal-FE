@@ -41,7 +41,7 @@ export const GetUserProfile = createAsyncThunk(
         toast.error(error.response.data.message);
         return rejectWithValue(error.response.data.message);
       } else {
-        toast.error('An unexpected error occurred');
+        // toast.error('An unexpected error occurred');
         return rejectWithValue('An unexpected error occurred');
       }
     });
