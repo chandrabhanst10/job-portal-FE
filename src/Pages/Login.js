@@ -4,12 +4,15 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosInstance from '../Utils/AxiosConfig';
+import { useDispatch } from 'react-redux';
+import { Authentication } from '../Store/Slices/UserSlice';
 
 const Login = () => {
     const [role, setRole] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const Navigate = useNavigate()
+    const dispatch =useDispatch()
     const emailChange = (event) => {
         setEmail(event.target.value)
     }
@@ -32,6 +35,7 @@ const Login = () => {
             }
         }).then((response) => {
             toast.success(response.data.message)
+            dispatch(Authentication())
             Navigate('/')
         }).catch((error) => {
             console.log(error);

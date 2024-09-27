@@ -23,7 +23,6 @@ export const AuthRoute = ({ children }) => {
     // // If not authenticated, render children or redirect to login
     // return !authentication ? children : navigateUser();
     const { authentication } = useSelector((state) => state.user);
-
     // If the user is authenticated, redirect them to the home page or another appropriate page
     if (authentication) {
         return <Navigate to="/" replace />;

@@ -13,17 +13,34 @@ const initialState = {
 export const Authentication = createAsyncThunk(
   "user/checkAuthentication",
   async (_, { rejectWithValue }) => {
-    try {
-      // Get the token from cookies
-      const token = Cookies.get('token');
-      if (token) {
-        return true; // If token exists, return true
-      } else {
-        return false; // If no token, return false
+    // try {
+    //   // Get the token from cookies
+    //   const token = Cookies.get('token');
+    //   console.log("@@@@@@@",token);
+      
+    //   if (token) {
+    //     return true; // If token exists, return true
+    //   } else {
+    //     return false; // If no token, return false
+    //   }
+    // } catch (error) {
+    //   return rejectWithValue('Error while checking authentication');
+    // }
+    return axiosInstance.get("/api/user/check-token", {
+      headers: {
+        'Content-Type': 'multipart/form-data',
       }
-    } catch (error) {
-      return rejectWithValue('Error while checking authentication');
-    }
+    }).then((response) => {
+      return response.data.token
+    }).catch((error) => {
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+        return rejectWithValue(error.response.data.message);
+      } else {
+        // toast.error('An unexpected error occurred');
+        return rejectWithValue('An unexpected error occurred');
+      }
+    });
   }
 );
 
