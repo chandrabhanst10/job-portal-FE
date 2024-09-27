@@ -18,9 +18,7 @@ const JobDetails = () => {
     const dispatch = useDispatch()
     const [isSaved, setIsSaved] = useState(false)
     const { userProfileData } = useSelector(state => state.user)
-    const isSavedJob = () => {
-        setIsSaved(userProfileData?.savedJobs.includes(params.id))
-    }
+    
     const GetJobDetails = (id) => {
         setLoading(true);
         axiosInstance.get(`api/jobs/job-details/${id}`, {
@@ -42,8 +40,11 @@ const JobDetails = () => {
     }
     useEffect(() => {
         GetJobDetails(params.id)
+        const isSavedJob = () => {
+            setIsSaved(userProfileData?.savedJobs.includes(params.id))
+        }
         isSavedJob()
-    }, [params.id])
+    }, [params.id,userProfileData])
 
     const saveJob = () => {
         dispatch(SaveJob(params.id))
