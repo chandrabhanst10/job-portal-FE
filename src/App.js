@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <WebRoutes />
-      <ToastContainer />
+      <ToastContainer autoClose={500}/>
     </div>
   );
 }

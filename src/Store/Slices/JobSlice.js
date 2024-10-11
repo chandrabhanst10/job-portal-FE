@@ -3,20 +3,15 @@ import axiosInstance from '../../Utils/AxiosConfig';
 import { toast } from 'react-toastify';
 const initialState = {
   allJobs: [],
+  singleJob:{},
   loading: false,
-  userProfileData: null
+  userProfileData: null,
 }
 
 export const PostNewJob = createAsyncThunk(
   "PostNewJob",
   async (payload, { rejectWithValue }) => {
-    console.log(payload);
-    return axiosInstance.post("/api/jobs/post-job", payload, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    }).then((response) => {
-      console.log(response);
+    return axiosInstance.post("/api/jobs/post-job", payload,).then((response) => {
       return response.data.message
     }).catch((error) => {
       if (error.response && error.response.data && error.response.data.message) {
@@ -26,7 +21,6 @@ export const PostNewJob = createAsyncThunk(
         toast.error('An unexpected error occurred');
         return rejectWithValue('An unexpected error occurred');
       }
-
     });
   });
 
@@ -48,10 +42,27 @@ export const GetAllJobs = createAsyncThunk(
         return rejectWithValue('An unexpected error occurred');
       }
     });
-  });
+});
 
-export const selectUserProfileData = (state) => state.user.userProfileData;
-
+export const GetSingleJob = createAsyncThunk(
+  "GetSingleJob",
+  async (payload, { rejectWithValue }) => {
+    return axiosInstance.get(`api/jobs/job-details/${payload}`, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    }).then((response) => {
+      return response.data.job
+    }).catch((error) => {
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+        return rejectWithValue(error.response.data.message);
+      } else {
+        // toast.error('An unexpected error occurred');
+        return rejectWithValue('An unexpected error occurred');
+      }
+    });
+});
 
 export const IsSavedJob = createAsyncThunk(
   "IsSavedJob",
@@ -61,7 +72,6 @@ export const IsSavedJob = createAsyncThunk(
 
     // Check if savedJobs includes the job ID
     if (userProfileData?.savedJobs.includes(payload)) {
-      console.log(userProfileData);
       
       return { isSaved: true }; // Return a value if the job is saved
     } else {
@@ -145,6 +155,15 @@ export const JobSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
+      .addCase(GetSingleJob.fulfilled, (state, action) => {
+        state.loading = false;
+        state.allJobs = action.payload;
+        state.singleJob = action.payload;
+      })
+      .addCase(GetSingleJob.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(GetAllJobs.fulfilled, (state, action) => {
         state.loading = false;
         state.allJobs = action.payload;
@@ -171,11 +190,6 @@ export const JobSlice = createSlice({
       .addCase(UnSaveJob.fulfilled, (state, action) => {
         state.loading = false;
       })
-      .addCase('user/setUserProfileData', (state, action) => {
-        // Access the userProfileData from the UserSlice
-        const userProfileData = action.payload; // or you could access it through a selector
-        console.log('User Profile Data:', userProfileData);
-      });
   }
 })
 

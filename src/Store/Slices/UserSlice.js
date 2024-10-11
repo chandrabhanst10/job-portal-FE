@@ -1,31 +1,91 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import Cookies from 'js-cookie';
 import axiosInstance from '../../Utils/AxiosConfig';
 import { toast } from 'react-toastify';
+import HomeIcon from '@mui/icons-material/Home';
+import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
+import BusinessIcon from '@mui/icons-material/Business';
 const initialState = {
   loading: false,
   error: null,
   message: null,
   authentication: false,
-  userProfileData: null
+  userProfileData: null,
+  showSubscriptionHeader:true,
+  subscriptionPlans:[
+    {
+      icon:<HomeIcon/>,
+      type: "Basic Plan",
+      price: "$9.99/month",
+      desc: "Ideal for individuals just getting started.",
+      features: [
+        { text: "Access to all basic features" },
+        { text: "Email support" },
+        { text: "Single user account" }
+      ]
+    },
+    {
+      icon:<HeartBrokenIcon/>,
+      type: "Pro Plan",
+      price: "$19.99/month",
+      desc: "Perfect for professionals looking for more advanced tools.",
+      features: [
+        { text: "All features from Basic Plan" },
+        { text: "Priority email support" },
+        { text: "Multi-user collaboration" },
+        { text: "Advanced analytics and reports" }
+      ]
+    },
+    {
+      icon:<BusinessIcon/>,
+      type: "Enterprise Plan",
+      price: "Custom Pricing",
+      desc: "Tailored solutions for large teams and businesses.",
+      features: [
+        { text: "All features from Pro Plan" },
+        { text: "Dedicated account manager" },
+        { text: "24/7 priority support" },
+        { text: "Custom integrations and API access" }
+      ]
+    }
+  ]
 }
+
+export const RegisterUser = createAsyncThunk(
+  "RegisterUser",
+  (payload, { rejectWithValue }) => {
+    return axiosInstance.post("/api/user/register",payload).then((response) => {
+      toast.success(response.data.message);
+      return response.data.user
+    }).catch((error) => {
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+        return rejectWithValue(error.response.data.message);
+      } else {
+        toast.error('An unexpected error occurred');
+        return rejectWithValue('An unexpected error occurred');
+      }
+    });
+});
+
+export const LoginUser = createAsyncThunk(
+  "LoginUser",
+  (payload, { rejectWithValue }) => {
+    return axiosInstance.post("/api/user/login",payload).then((response) => {
+      return response.data.user
+    }).catch((error) => {
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message);
+        return rejectWithValue(error.response.data.message);
+      } else {
+        toast.error('An unexpected error occurred');
+        return rejectWithValue('An unexpected error occurred');
+      }
+    });
+});
 
 export const Authentication = createAsyncThunk(
   "user/checkAuthentication",
   async (_, { rejectWithValue }) => {
-    // try {
-    //   // Get the token from cookies
-    //   const token = Cookies.get('token');
-    //   console.log("@@@@@@@",token);
-      
-    //   if (token) {
-    //     return true; // If token exists, return true
-    //   } else {
-    //     return false; // If no token, return false
-    //   }
-    // } catch (error) {
-    //   return rejectWithValue('Error while checking authentication');
-    // }
     return axiosInstance.get("/api/user/check-token", {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -66,35 +126,19 @@ export const GetUserProfile = createAsyncThunk(
 
 export const Logout = createAsyncThunk(
   "Logut",
-  (_, { rejectWithValue }) => {
+  () => {
     return axiosInstance.get("/api/user/logout", {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
-    }).then((response) => {
-      return response.data.user
-    }).catch((error) => {
-      if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message);
-        return rejectWithValue(error.response.data.message);
-      } else {
-        toast.error('An unexpected error occurred');
-        return rejectWithValue('An unexpected error occurred');
-      }
-
-    });
-});
+    })
+  });
 
 export const UpdateProfileAction = createAsyncThunk(
   "UpdateProfileAction",
   (payload, { rejectWithValue }) => {
-    console.log(payload);
     
-    return axiosInstance.put("/api/user/UpdateProfile",payload, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    }).then((response) => {
+    return axiosInstance.put("/api/user/UpdateProfile",payload).then((response) => {
       return response.data.user
     }).catch((error) => {
       if (error.response && error.response.data && error.response.data.message) {
@@ -112,16 +156,33 @@ export const UserSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-
+    handleSubscriptionHeader: (state) => {
+      state.showSubscriptionHeader = !state.showSubscriptionHeader
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(Authentication.pending, (state) => {
+      .addCase(RegisterUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(Authentication.fulfilled, (state, action) => {
+      .addCase(RegisterUser.fulfilled, (state, action) => {
         state.loading = false;
+        Authentication()
+      })
+      .addCase(LoginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(LoginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        Authentication()
+        state.userProfileData= action.payload
+      })
+      .addCase(Authentication.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(Authentication.fulfilled, (state, action) => {
         state.authentication = action.payload;
       })
       .addCase(GetUserProfile.fulfilled, (state, action) => {
@@ -152,5 +213,6 @@ export const UserSlice = createSlice({
   }
 })
 
+export const { handleSubscriptionHeader} = UserSlice.actions
 
 export default UserSlice.reducer

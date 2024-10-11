@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { cityOptions, jobNicheOptions } from '../Utils/Config.js';
@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import JobCard from '../Components/JobCard.js';
 import LoadingComponent from '../Components/LoadingComponent.js';
 import { useDispatch, useSelector } from "react-redux"
-import { SaveJob, UnSaveJob } from "../Store/Slices/JobSlice.js"
+import { GetAllJobs, SaveJob, UnSaveJob } from "../Store/Slices/JobSlice.js"
+import { GetUserProfile } from '../Store/Slices/UserSlice.js';
 
 const Jobs = () => {
   const [city, setcity] = useState("")
@@ -15,7 +16,9 @@ const Jobs = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { allJobs, loading } = useSelector(state => state.job)
-
+  useEffect(() => {
+    dispatch(GetAllJobs())
+  }, [dispatch,])
   const handleCityChange = (event) => {
     setcity(event.target.value);
   };
@@ -29,10 +32,16 @@ const Jobs = () => {
     navigate(`/jobs-details/${jobId}`)
   };
   const saveJob = (jobId) => {
-    dispatch(SaveJob(jobId))
+    dispatch(SaveJob(jobId)).then(() => {
+      dispatch(GetAllJobs());
+      dispatch(GetUserProfile());
+    });
   };
-  const unSaveJob = (jobId) => { 
-    dispatch(UnSaveJob(jobId))
+  const unSaveJob = (jobId) => {
+    dispatch(UnSaveJob(jobId)).then(() => {
+      dispatch(GetAllJobs());
+      dispatch(GetUserProfile());
+    });
   };
   return (
     <JobsContainer>
@@ -87,7 +96,7 @@ const AllJobs = ({ jobList, applyNow, saveJob, unSaveJob }) => {
   return <Box>
     <Grid container spacing={2}>
       {
-        jobList.map((job, index) => {
+        jobList?.map((job, index) => {
           return <Grid item xs={12} sm={6} md={4} lg={4} key={index}>
             <JobCard jobId={job._id} title={job.title} jobType={job.jobType} companyName={job.companyName} location={job.location} showJob={applyNow} saveJob={saveJob} unSaveJob={unSaveJob} />
           </Grid>

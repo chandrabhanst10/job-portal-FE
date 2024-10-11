@@ -1,6 +1,7 @@
 import { Box, Button, Grid, InputLabel, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 
@@ -12,11 +13,18 @@ const Application = () => {
     const [resume, setResume] = useState("")
     const [coverLatter, setCoverLatter] = useState("")
     const { userProfileData } = useSelector(state => state?.user)
-    console.log(userProfileData);
-    useEffect(() => {
-        settingValues();
-    }, [userProfileData])
+    const Navigate=useNavigate()
 
+    const checkingRequiredData = () => {
+        if (userProfileData?.resume?.name === "" || userProfileData?.resume?.name === undefined) {
+            Navigate("/update-profile")
+            toast.error("Please Upload Resume to apply for any job")
+        }
+        if (userProfileData?.coverLatter?.name === "" || userProfileData?.coverLatter?.name === undefined) {
+            Navigate("/update-profile")
+            toast.error("Please Upload Cover Latter to apply for any job")
+        }
+    }
     const settingValues = () => {
         setName(userProfileData?.name)
         setEmail(userProfileData?.email)
@@ -24,20 +32,13 @@ const Application = () => {
         setAddress(userProfileData?.address)
         setResume(userProfileData?.resume)
         setCoverLatter(userProfileData?.coverLatter)
+        
+    }
+
+    useEffect(() => {
         checkingRequiredData()
-    }
-    const checkingRequiredData = () => {
-        console.log(userProfileData?.resume?.name);
-        console.log(userProfileData?.coverLatter);
-
-        if (userProfileData?.resume?.name === "" || userProfileData?.resume?.name === undefined) {
-            toast.error("Please Upload Resume to apply for any job")
-        }
-        if (userProfileData?.coverLatter?.name === "" || userProfileData?.coverLatter?.name === undefined) {
-            toast.error("Please Upload Cover Latter to apply for any job")
-        }
-
-    }
+        settingValues();
+    })
     const phoneChange = (event) => {
         const { value } = event.target;
         if (/^\d*$/.test(value)) {

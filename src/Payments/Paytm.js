@@ -1,0 +1,1 @@
+import Paytm from 'paytmchecksum'

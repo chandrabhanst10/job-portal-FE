@@ -1,11 +1,11 @@
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import axiosInstance from '../Utils/AxiosConfig';
-import { useDispatch } from 'react-redux';
-import { Authentication } from '../Store/Slices/UserSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import {Authentication, GetUserProfile, LoginUser } from '../Store/Slices/UserSlice';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { GetAllJobs } from '../Store/Slices/JobSlice';
 
 const Login = () => {
     const [role, setRole] = useState("")
@@ -13,6 +13,8 @@ const Login = () => {
     const [password, setPassword] = useState("")
     const Navigate = useNavigate()
     const dispatch =useDispatch()
+    const {loading} = useSelector(state=>state.user)
+
     const emailChange = (event) => {
         setEmail(event.target.value)
     }
@@ -21,25 +23,28 @@ const Login = () => {
     }
     const handleRoleChange = (event) => {
         setRole(event.target.value)
+        setEmail("")
+        setPassword("")
     }
     const onSubmit = async () => {
         const payload = {
             email: email,
             password: password,
             role: role
-            
         }
-        axiosInstance.post("/api/user/login", payload, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
+        // const result = await dispatch()
+        // if (LoginUser.fulfilled.match(result)) {
+        //     Navigate("/");
+        // }
+        dispatch(LoginUser(payload)).then((response) => {
+            if (!response.error) {
+                dispatch(GetAllJobs());
+                dispatch(GetUserProfile());
+                dispatch(Authentication());
+                Navigate("/");
             }
-        }).then((response) => {
-            toast.success(response.data.message)
-            dispatch(Authentication())
-            Navigate('/')
-        }).catch((error) => {
-            console.log(error);
-            toast.error(error)
+        }).catch(() => {
+            Navigate("/login");
         });
     }
     return (
@@ -50,6 +55,7 @@ const Login = () => {
                 <Select
                     value={role}
                     onChange={handleRoleChange}
+                    IconComponent={KeyboardArrowDownIcon}
                 >
                     <MenuItem value={"Job Seeker"}>
                         Job Seeker
@@ -64,7 +70,7 @@ const Login = () => {
             <TextField fullWidth placeholder='Enter email' value={email} onChange={emailChange} />
             <InputLabel>Password</InputLabel>
             <TextField fullWidth placeholder='Enter password' value={password} onChange={passwordChange} />
-            <Button variant='contained' fullWidth onClick={onSubmit}>Login</Button>
+            <Button variant='contained' fullWidth onClick={onSubmit} endIcon={loading && <CircularProgress color="inherit" />}>Login</Button>
         </LoginContainer>
     )
 }

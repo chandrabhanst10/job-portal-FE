@@ -9,9 +9,11 @@ const SideBar = () => {
     const Navigate = useNavigate();
     const { authentication,userProfileData } = useSelector((state) => state.user)
     const dispatch=useDispatch()
-    const logout = async() => {
-        await dispatch(Logout())
-        Navigate("/login")
+    const logout = async () => {
+        let result = await dispatch(Logout())
+        if (Logout.fulfilled.match(result)) {
+            Navigate("/login");
+        }
     }
     return (
         <SideBarContainer>
@@ -51,16 +53,12 @@ const SideBarContainer = styled(Box)({
         textAlign: "center",
         margin: "auto",
     },
-    "& .profileImgContainer": {
-        width: "100%",
-        height: "48%",
-        border: "3px solid #3498db",
-        borderRadius: "50%"
-    },
     "& .profileImg": {
-        width: "100%",
-        height: "100%",
-        objectFit: "contain"
+        width: "200px",
+        height: "200px",
+        objectFit: "contain",
+        border: "3px solid #3498db",
+ borderRadius: "50%"
     },
     '@media (max-width: 576px)': {
         width: "100%",

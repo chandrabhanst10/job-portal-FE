@@ -44,7 +44,6 @@ const UpdateProfile = () => {
     }
     const firstNicheChange = (event) => {
         setFirstNiche(event.target.value)
-        console.log(event.target.value)
         let newJobList = nicheList.filter((job) => {
             return job.label !== event.target.value
         })

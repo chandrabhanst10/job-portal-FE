@@ -1,12 +1,14 @@
-import { Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { jobNicheOptions } from '../Utils/Config.js'
-import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import axiosInstance from '../Utils/AxiosConfig.js'
 import CircularProgress from '@mui/material/CircularProgress';
+import { Authentication, GetUserProfile, RegisterUser } from '../Store/Slices/UserSlice.js'
+import { useDispatch, useSelector } from 'react-redux'
+import InfoIcon from '@mui/icons-material/Info';
+import { GetAllJobs } from '../Store/Slices/JobSlice.js'
 const Register = () => {
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
@@ -16,17 +18,26 @@ const Register = () => {
     const [secondNiche, setSecondNiche] = useState("")
     const [thirdNiche, setThirdNiche] = useState("")
     const [resume, setResume] = useState("")
-    const [coverLatter, setCoverLatter] = useState("")
+    const [coverLetter, setcoverLetter] = useState("")
     const [password, setPassword] = useState("")
     const [role, setRole] = useState("")
     const [nicheList, setNicheList] = useState([])
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
+    const dispatch = useDispatch()
     const Navigate = useNavigate()
+    const {loading} = useSelector(state=>state.user)
     useEffect(() => {
         setNicheList(jobNicheOptions)
     }, [])
     const roleChange = (event) => {
         setRole(event.target.value)
+        setName("");
+        setEmail("");
+        setPhone("");
+        setAddress("");
+        setResume("");
+        setPassword("");
+        setcoverLetter("");
         setFirstNiche("");
         setSecondNiche("");
         setThirdNiche("");
@@ -51,7 +62,6 @@ const Register = () => {
     }
     const firstNicheChange = (event) => {
         setFirstNiche(event.target.value)
-        console.log(event.target.value)
         let newJobList = nicheList.filter((job) => {
             return job.label !== event.target.value
         })
@@ -78,11 +88,11 @@ const Register = () => {
     const resumeChange = (event) => {
         setResume(event.target.files)
     }
-    const coverLatterChange = (event) => {
-        setCoverLatter(event.target.files)
+    const coverLetterChange = (event) => {
+        setcoverLetter(event.target.files)
     }
     const onSubmit = () => {
-        setLoading(true);
+        // setLoading(true);
         const payload = {
             name: name,
             email: email,
@@ -93,24 +103,20 @@ const Register = () => {
             firstNiche: firstNiche,
             secondNiche: secondNiche,
             thirdNiche: thirdNiche,
-            coverLatter: coverLatter,
+            coverLetter: coverLetter[0],
             resume: resume[0]
         }
-        axiosInstance.post("/api/user/register", payload, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
+        dispatch(RegisterUser(payload)).then((response) => {
+            console.log("@@@@@@", response);
+            if (!response.error) {
+                dispatch(GetAllJobs());
+                dispatch(GetUserProfile());
+                dispatch(Authentication());
+                Navigate("/");
             }
-        }).then((response) => {
-            if (response.data.success) {
-                setLoading(false);
-                toast.success(response.data.message)
-                Navigate("/")
-            } else {
-                toast.warning(response.data.message)
-            }
-        }).catch((error) => {
-            setLoading(false);
-            console.error("Error:", error.response || error.message);
+            // setLoading(false);
+        }).catch(() => {
+            Navigate("/register");
         });
     }
     return (
@@ -138,11 +144,25 @@ const Register = () => {
                     </Grid>
                     <Grid item xs={12} sm={12} md={6} lg={6}>
                         <InputLabel>Address</InputLabel>
-                        <TextField fullWidth placeholder='Enter phone' value={address} onChange={addressChange} />
+                        <TextField fullWidth placeholder='Enter Address' value={address} onChange={addressChange} />
                     </Grid>
                     <Grid item xs={12} sm={12} md={6} lg={6}>
                         <InputLabel>Password</InputLabel>
-                        <TextField fullWidth placeholder='Enter password' value={password} onChange={passwordChange} />
+                        <TextField
+                            fullWidth
+                            placeholder='Enter password'
+                            value={password}
+                            onChange={passwordChange}
+                            InputProps={{
+                                endAdornment:
+                                    <Box className="passwordContainer">
+                                        <Tooltip title={<ToolTipText />} arrow placement="top">
+                                            <IconButton>
+                                                <InfoIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+                            }} />
                     </Grid>
                 </>}
                 {role === "Job Seeker" && <>
@@ -233,18 +253,28 @@ const Register = () => {
                             Upload Cover Latter
                             <input
                                 type="file"
-                                onChange={coverLatterChange}
+                                onChange={coverLetterChange}
                                 multiple={false}
                                 style={{ display: "none" }}
                             />
                         </Button>
-                        <Typography variant='subtitle1'>{coverLatter[0]?.name}</Typography>
+                        <Typography variant='subtitle1'>{coverLetter[0]?.name}</Typography>
                     </Grid>
                 </>}
             </Grid>
             <Button variant='contained' fullWidth disabled={loading} onClick={onSubmit} endIcon={loading && <CircularProgress color="inherit" />}>Register</Button>
         </RegisterContainer>
     )
+}
+
+const ToolTipText = (props) => {
+    return <ToolTipTextContainer>
+        <Typography variant="caption" color="textPrimary">At least one lowercase letter.</Typography>
+        <Typography variant="caption" color="textPrimary">At least one uppercase letter.</Typography>
+        <Typography variant="caption" color="textPrimary">At least one digit.</Typography>
+        <Typography variant="caption" color="textPrimary">At least one special character.</Typography>
+        <Typography variant="caption" color="textPrimary">The string must be exactly 8 characters long.</Typography>
+    </ToolTipTextContainer>
 }
 
 export default Register
@@ -257,5 +287,13 @@ const RegisterContainer = styled(Box)({
     "& .divider": {
         height: "1px",
         width: "100%"
+    },
+    "& .passwordContainer": {
+        display: "flex"
+    }
+})
+const ToolTipTextContainer = styled(Box)({
+    "& .": {
+
     }
 })

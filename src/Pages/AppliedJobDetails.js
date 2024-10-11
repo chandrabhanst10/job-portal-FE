@@ -8,8 +8,6 @@ const AppliedJobDetails = () => {
     const params = useParams()
     const [jobDetails, setJobDetails] = useState()
     useEffect(() => {
-        console.log(params.jobId);
-        
         const jobDetailsItem = GetAppliedJobDetails(params.jobId)
         setJobDetails(jobDetailsItem);
     }, [jobDetails,params.jobId])

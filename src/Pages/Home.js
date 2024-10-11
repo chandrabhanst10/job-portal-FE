@@ -1,18 +1,23 @@
 import { Box, Chip, Grid, IconButton, MenuItem, Paper, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import WorkIcon from '../Assets/work.png';
 import savedjobs from '../Assets/savedjobs.png';
-import More from '../Assets/more.png';
 import { Joblist } from '../Utils/Config.js';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { GetAllJobs } from '../Store/Slices/JobSlice.js';
+import { GetUserProfile } from '../Store/Slices/UserSlice.js';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 const Home = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const {userProfileData}=useSelector((state)=>state.user)
   const {allJobs}=useSelector((state)=>state.job)
-  
+  const dispatch=useDispatch()
+  useEffect(()=>{
+    dispatch(GetAllJobs())
+    dispatch(GetUserProfile())
+  },[dispatch])
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -51,7 +56,7 @@ const Home = () => {
           <CardContainer2>
             <TextContainer>
               <Typography variant="h4" component="div" fontWeight="bold">
-                {userProfileData?.savedJobs.length}
+                {userProfileData?.savedJobs.length>0?userProfileData?.savedJobs.length:0}
               </Typography>
               <Typography variant="subtitle1" color="textSecondary">
                 Saved Jobs
@@ -88,7 +93,7 @@ const Home = () => {
                 <TableCell align="left">{row.salary}</TableCell>
                 <TableCell align="left">
                   <IconButton onClick={handleClick}>
-                    <img src={More} alt='more' />
+                    <MoreVertIcon />
                   </IconButton>
                   <PopoverContainer
                     id={id}

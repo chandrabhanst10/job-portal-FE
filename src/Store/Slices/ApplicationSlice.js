@@ -10,13 +10,11 @@ const initialState = {
 export const PostNewApplication = createAsyncThunk(
   "PostNewJob",
   async (payload, { rejectWithValue }) => {
-    console.log(payload);
     return axiosInstance.post(`/api/application/post-application/${payload.jobId}`, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
     }).then((response) => {
-      console.log(response);
       return response.data.message
     }).catch((error) => {
       if (error.response && error.response.data && error.response.data.message) {
