@@ -1,20 +1,12 @@
-import { Box, MenuItem } from '@mui/material'
+import { Box, Divider, MenuItem } from '@mui/material'
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import ProfileImg from "../Assets/profile.png"
-import { useDispatch, useSelector } from 'react-redux'
-import { Logout } from '../Store/Slices/UserSlice'
+import { useSelector } from 'react-redux'
 const SideBar = () => {
-    const Navigate = useNavigate();
     const { authentication,userProfileData } = useSelector((state) => state.user)
-    const dispatch=useDispatch()
-    const logout = async () => {
-        let result = await dispatch(Logout())
-        if (Logout.fulfilled.match(result)) {
-            Navigate("/login");
-        }
-    }
+    
     return (
         <SideBarContainer>
             <Box className="profileImgContainer">
@@ -23,6 +15,8 @@ const SideBar = () => {
             {authentication ?
                 <>
                     <Link className='menuItem' to={"/"}><MenuItem className="menuItem">My Profile</MenuItem></Link>
+                    <Link className='menuItem' to={"/"}><MenuItem className="menuItem">Home</MenuItem></Link>
+                    <Link className='menuItem' to={"/jobs"}><MenuItem className="menuItem">Jobs</MenuItem></Link>
                     <Link className='menuItem' to={"/update-profile"}><MenuItem className="menuItem">Update Profile</MenuItem></Link>
                     <Link className='menuItem' to={"/update-password"}><MenuItem className="menuItem">Update Password</MenuItem></Link>
                     {userProfileData?.role==="Employer"&&
@@ -32,7 +26,8 @@ const SideBar = () => {
                     <Link className='menuItem' to={"/"}><MenuItem className="menuItem">My Jobs</MenuItem></Link>
                     }
                     <Link className='menuItem' to={"/create-application"}><MenuItem className="menuItem">Applications</MenuItem></Link>
-                    <MenuItem onClick={logout}>Logout</MenuItem>
+                    <Divider/>
+                    <Link className='menuItem' to={"/subscription"}><MenuItem className="premiumText">🌟Try Premium🌟</MenuItem></Link>
                 </>
                 : ""
             }
@@ -47,6 +42,10 @@ const SideBarContainer = styled(Box)({
     padding: "20px",
     width: "300px",
     borderRadius: "10px",
+    "& .premiumText":{
+        color:"gold",
+        textDecoration:"none"
+    },
     "& .menuItem": {
         color: "gray",
         textDecoration: "none",

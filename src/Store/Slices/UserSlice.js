@@ -13,9 +13,9 @@ const initialState = {
   showSubscriptionHeader:true,
   subscriptionPlans:[
     {
-      icon:<HomeIcon/>,
+      icon:`${HomeIcon}`,
       type: "Basic Plan",
-      price: "$9.99/month",
+      price: "$100/month",
       desc: "Ideal for individuals just getting started.",
       features: [
         { text: "Access to all basic features" },
@@ -24,9 +24,9 @@ const initialState = {
       ]
     },
     {
-      icon:<HeartBrokenIcon/>,
+      icon:`${HeartBrokenIcon}`,
       type: "Pro Plan",
-      price: "$19.99/month",
+      price: "$500/month",
       desc: "Perfect for professionals looking for more advanced tools.",
       features: [
         { text: "All features from Basic Plan" },
@@ -36,9 +36,9 @@ const initialState = {
       ]
     },
     {
-      icon:<BusinessIcon/>,
+      icon:`${BusinessIcon}`,
       type: "Enterprise Plan",
-      price: "Custom Pricing",
+      price: "$1000/month",
       desc: "Tailored solutions for large teams and businesses.",
       features: [
         { text: "All features from Pro Plan" },
@@ -163,7 +163,7 @@ export const UserSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(RegisterUser.pending, (state) => {
-        state.loading = true;
+        state.loading = false;
         state.error = null;
       })
       .addCase(RegisterUser.fulfilled, (state, action) => {
@@ -171,7 +171,7 @@ export const UserSlice = createSlice({
         Authentication()
       })
       .addCase(LoginUser.pending, (state) => {
-        state.loading = true;
+        state.loading = false;
         state.error = null;
       })
       .addCase(LoginUser.fulfilled, (state, action) => {

@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box} from '@mui/material'
 import React, { useEffect } from 'react'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -21,30 +21,39 @@ import Application from './Pages/Application.js'
 import { Authentication, GetUserProfile, handleSubscriptionHeader } from './Store/Slices/UserSlice.js'
 import PremiumHeader from './Components/PremiumHeader.js'
 import Subscription from './Pages/Subscription.js'
+import { io } from "socket.io-client"
+import { toast } from 'react-toastify'
+import { Notificatons } from './Notification/Notification.js'
 const WebRoutes = () => {
-  const {showSubscriptionHeader} = useSelector((state) => state.user)
+  const { showSubscriptionHeader } = useSelector((state) => state.user)
   const dispatch = useDispatch()
-  const Navigate=useNavigate()
-  const handleClose=()=>{
+  const Navigate = useNavigate()
+  const socket = io("http://localhost:5500")
+  const handleClose = () => {
     dispatch(handleSubscriptionHeader())
   }
-  const handleNavigate=()=>{
+  const handleNavigate = () => {
     dispatch(handleSubscriptionHeader())
     Navigate("/subscription")
   }
   const { userProfileData } = useSelector((state) => state.user);
+  
   useEffect(() => {
     dispatch(Authentication())
-    dispatch(GetUserProfile())
-  },[dispatch]); 
-
+    dispatch(GetUserProfile());
+    Notificatons(socket)
+  }, [dispatch]);
+// const handleSubmit=(e)=>{
+//   e.preventDefault()
+// socket.emit("message",message)
+// }
   return (
     <CommonLayoutContainer>
       <Box>
         <Header />
-        {userProfileData?.role &&<PremiumHeader showHeader={showSubscriptionHeader} handleClose={handleClose} handleNavigate={handleNavigate}/>}
+        {/* {userProfileData?.role && <PremiumHeader showHeader={showSubscriptionHeader} handleClose={handleClose} handleNavigate={handleNavigate} />} */}
       </Box>
-      <Box className={showSubscriptionHeader && userProfileData?.role?"layoutBottomshow":"layoutBottom"}>
+      <Box className={"layoutBottom"}>
         <SideBar />
         <WebRoutesContainer>
           <Routes>
@@ -56,10 +65,10 @@ const WebRoutes = () => {
             <Route path='/applied-jobs-details/:jobId' element={<AuthenticationRoute><AppliedJobDetails /></AuthenticationRoute>} />
             <Route path='/update-profile' element={<AuthenticationRoute><UpdateProfile /></AuthenticationRoute>} />
             <Route path='/update-password' element={<AuthenticationRoute><UpdatePassword /></AuthenticationRoute>} />
-            <Route path='/subscription' element={<AuthSubscription><Subscription /></AuthSubscription>} />
-            {userProfileData?.role ==="Employer" && <>
-            <Route path='/post-new-job' element={<AuthenticationRoute><PostNewJob /></AuthenticationRoute>} />
-            </> }
+            {userProfileData?.role && <Route path='/subscription' element={<AuthSubscription><Subscription /></AuthSubscription>} />}
+            {userProfileData?.role === "Employer" && <>
+              <Route path='/post-new-job' element={<AuthenticationRoute><PostNewJob /></AuthenticationRoute>} />
+            </>}
             <Route path='/login' element={<AuthRoute><Login /></AuthRoute>} />
             <Route path='/register' element={<AuthRoute><Register /></AuthRoute>} />
             <Route path='/create-application' element={<AuthenticationRoute><Application /></AuthenticationRoute>} />
@@ -90,7 +99,7 @@ const CommonLayoutContainer = styled(Box)({
     backgroundColor: "#eee",
     overflow: "scroll",
     padding: "20px",
-   
+
     '@media (max-width: 576px)': {
       flexDirection: "column",
       height: "auto",

@@ -7,7 +7,7 @@ const SubscriptionCard = ({ icon, type, price, desc, features }) => {
     return (
         <SubscriptionCardContainer>
             <Box>
-                <Typography className='typeText'>{icon}{type}</Typography>
+                <Typography className='typeText'>{<icon/>}{type}</Typography>
                 <Typography className='priceText'>{price}</Typography>
                 <Typography className='decText'>{desc}</Typography>
                 <List>

@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
+import { Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
@@ -26,16 +26,13 @@ const Login = () => {
         setEmail("")
         setPassword("")
     }
-    const onSubmit = async () => {
+    const onSubmit = async (e) => {
+        e.preventDefault();
         const payload = {
             email: email,
             password: password,
             role: role
         }
-        // const result = await dispatch()
-        // if (LoginUser.fulfilled.match(result)) {
-        //     Navigate("/");
-        // }
         dispatch(LoginUser(payload)).then((response) => {
             if (!response.error) {
                 dispatch(GetAllJobs());
@@ -48,7 +45,7 @@ const Login = () => {
         });
     }
     return (
-        <LoginContainer>
+        <LoginContainer onSubmit={onSubmit}>
             <Typography variant='h4' align='center'>Login</Typography>
             <FormControl fullWidth>
                 <InputLabel>Select Role</InputLabel>
@@ -70,13 +67,13 @@ const Login = () => {
             <TextField fullWidth placeholder='Enter email' value={email} onChange={emailChange} />
             <InputLabel>Password</InputLabel>
             <TextField fullWidth placeholder='Enter password' value={password} onChange={passwordChange} />
-            <Button variant='contained' fullWidth onClick={onSubmit} endIcon={loading && <CircularProgress color="inherit" />}>Login</Button>
+            <Button variant='contained' fullWidth type='submit' endIcon={loading && <CircularProgress color="inherit" />}>Login</Button>
         </LoginContainer>
     )
 }
 
 export default Login
-const LoginContainer = styled(Box)({
+const LoginContainer = styled('form')({
     display: "flex",
     justifyContent: "center",
     alignItems: "flex-start",
